@@ -1,3 +1,4 @@
+# Source/Headers required to build a qamqp library
 
 HEADERS += src/qamqp/amqp.h
 HEADERS += src/qamqp/amqp_authenticator.h
@@ -23,3 +24,13 @@ SOURCES += src/qamqp/amqp_exchange.cpp
 SOURCES += src/qamqp/amqp_frame.cpp
 SOURCES += src/qamqp/amqp_network.cpp
 SOURCES += src/qamqp/amqp_queue.cpp 
+
+# headers needed to include moc objects in library
+HEADERS += src/routing/ReceiveLogDirect.h
+HEADERS += src/routing/EmitLogDirect.h
+HEADERS += src/pubsub/EmitLog.h
+HEADERS += src/pubsub/ReceiveLog.h
+HEADERS += src/workqueues/NewTask.h
+HEADERS += src/workqueues/Worker.h
+HEADERS += src/sendreceive/Send.h
+HEADERS += src/sendreceive/Receive.h
