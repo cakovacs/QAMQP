@@ -65,6 +65,7 @@ void ClientPrivate::init(QObject * parent)
 
 	QObject::connect(connection_, SIGNAL(connected()), pq_func(), SIGNAL(connected()));
 	QObject::connect(connection_, SIGNAL(disconnected()), pq_func(), SIGNAL(disconnected()));
+	QObject::connect(network_,    SIGNAL(errorMessage(QString)), pq_func(), SIGNAL(errorMessage(QString)));
 }
 
 void ClientPrivate::init(QObject * parent, const QUrl & con)

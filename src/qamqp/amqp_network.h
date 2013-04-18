@@ -45,9 +45,11 @@ namespace QAMQP
 		void connectTo(const QString & host = QString(), quint32 port = 0);
 		void error( QAbstractSocket::SocketError socketError );
 
+
 	signals:		
 		void connected();
 		void disconnected();
+		void errorMessage(QString err);
 
 	private slots:		
 		void readyRead();

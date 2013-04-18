@@ -24,6 +24,7 @@ void QAMQP::Network::connectTo( const QString & host, quint32 port )
 	if(!socket_)
 	{
 		qWarning("AMQP: Socket didn't create.");
+                emit errorMessage("AMQP: Socket didn't create.");
 		return;
 	}
 	QString h(host);
@@ -40,6 +41,7 @@ void QAMQP::Network::connectTo( const QString & host, quint32 port )
 		static_cast<QSslSocket *>(socket_.data())->connectToHostEncrypted(h, p);
 #else
 		qWarning("AMQP: You library has builded with QT_NO_SSL option.");
+		emit errorMessage("AMQP: You library has builded with QT_NO_SSL option.");
 #endif
 	} else {		
 		socket_->connectToHost(h, p);
@@ -81,6 +83,7 @@ void QAMQP::Network::error( QAbstractSocket::SocketError socketError )
 			
 		default:
 			qWarning() << "AMQP: Socket Error: " << socket_->errorString();
+                        emit errorMessage(socket_->errorString());
 			break;
 	}
 
@@ -109,6 +112,7 @@ void QAMQP::Network::readyRead()
 			if(magic != QAMQP::Frame::FRAME_END)
 			{
 				qWarning() << "Wrong end frame";
+				emit errorMessage("Wrong end frame");
 			}
 
 			QDataStream streamB(&buffer_, QIODevice::ReadOnly);
@@ -155,6 +159,7 @@ void QAMQP::Network::readyRead()
 				break;
 			default:
 				qWarning() << "AMQP: Unknown frame type: " << type;
+				emit errorMessage(QString("AMQP: Unknown frame type: ") + type);
 			}
 		}
 		else

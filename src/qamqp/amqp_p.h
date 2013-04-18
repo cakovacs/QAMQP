@@ -44,6 +44,8 @@ namespace QAMQP
 		
 
 		Client * const pq_ptr;
+        signals:
+	        void ErrorMessage(QString);	
 
 	};
 
