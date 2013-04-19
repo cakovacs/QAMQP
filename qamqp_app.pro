@@ -9,6 +9,7 @@ INCLUDEPATH += . $${INSTALL_DIR}/include/
 DEPENDPATH  += . $${INSTALL_DIR}/include/
 
 QMAKE_LIBDIR += $${INSTALL_DIR}/lib
+QMAKE_LFLAGS += -Wl,-rpath,$${ROOT_DIR}/$${INSTALL_DIR}/lib
 
 LIBS += -lQAMQP
 
