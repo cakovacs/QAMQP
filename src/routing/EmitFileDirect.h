@@ -31,20 +31,17 @@ public:
 	, dir_(dir)
 	, filters_(filter.split(',', QString::SkipEmptyParts))
     {
-	qDebug() << "---------------->>>>> input filter = " << filter;
 	// Create AMQP client
 	QAMQP::Client* client = new QAMQP::Client(this);
 	client->open(QUrl(address));
 
-	// Create the "direct_logs" fanout exchange
-	exchange_ =  client->createExchange("direct_logs");
+	// Create the "direct_files" fanout exchange
+	exchange_ =  client->createExchange("direct_files");
 	exchange_->declare("direct");
 
 	// set list of files in the directory using file filters, if any
 	files_ = dir_.entryList(filters_);
-	qDebug() << "----------- Directory: " << dir_.absolutePath();
-	qDebug() << "----------- Filters: " << filters_;
-	qDebug() << "----------- Number of files found: " << files_.size();
+	qDebug() << "Number of files found: " << files_.size();
     }
 
     void run()
@@ -71,12 +68,29 @@ protected slots:
 	files_.pop_front();
 
         // Create Message
-        QString message(QString("[%1: %2] %3")
+        QString message(QString("[%1: %2] %3 bytearray=")
           .arg(++counter)
           .arg(file)
           .arg(key)
           );
-        qDebug() << "EmitFileDirect::EmitFileMessage " << message;
+        qDebug() << "EmitFileDirect::EmitFileMessage() " << message;
+	
+	QByteArray data;
+
+	QFile fd(dir_.filePath(file));
+	if (! fd.open(QIODevice::ReadOnly)) {
+	    qDebug() << "EmitFileDirect::EmitFileMessage() Error, could not open file: " << dir_.absolutePath() << "/" << file;
+	    return;
+	}
+        data = fd.readAll();
+        qDebug() << "EmitFileDirect::EmitFileMessage() size() without file data=" << message.length();
+	//message.append(data);
+	char* bytes = data.data();
+	for (int i=0; i<data.size(); i++) 
+	    message += bytes[i];
+        qDebug() << "EmitFileDirect::EmitFileMessage() size() with file data=" << message.length();
+        qDebug() << "EmitFileDirect::EmitFileMessage() data.size() =" << data.size();
+	fd.close();
 
         // Publish
         exchange_->publish(message, key);

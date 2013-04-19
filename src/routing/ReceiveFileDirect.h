@@ -53,7 +53,7 @@ protected slots:
         // Loop on the list to bind with the keys
         QStringList split(list_.split(',', QString::SkipEmptyParts));
         for(int i = 0; i < split.size(); ++i)
-            queue_->bind("direct_logs", split.at(i));
+            queue_->bind("direct_files", split.at(i));
 
         // Start consuming
         queue_->consume(QAMQP::Queue::coNoAck);
@@ -67,6 +67,7 @@ protected slots:
         // Retrieve message
         QAMQP::MessagePtr message = queue_->getMessage();
         qDebug() << "ReceiveFileDirect::newMessage() " << message->payload;
+        qDebug() << "ReceiveFileDirect::newMessage() message.size()=" << message->payload.length();
     }
 
 private:
