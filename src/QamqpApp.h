@@ -21,6 +21,8 @@
 #include "sendreceive/Receive.h"
 #include "workqueues/NewTask.h"
 #include "workqueues/Worker.h"
+#include "routing/EmitFileDirect.h"
+#include "routing/ReceiveFileDirect.h"
 
 namespace QAMQP
 {
@@ -139,6 +141,27 @@ protected slots:
                 QString url = args[2];
                 QString lst = args[3];
                 commandImpl = new ReceiveLogDirect(url, lst, this);
+            }            
+	    else if ("emit_file_direct" == command)
+            {
+                if (args.size() < 6)
+                    throw std::runtime_error("Mandatory argument(s) missing!");
+
+                QString url = args[2];
+                QString cat = args[3];
+                QString dir = args[4];
+                QString flt = args[5];
+                commandImpl = new EmitFileDirect(url, cat, dir, flt, this);
+            }
+            else if ("receive_file_direct" == command)
+            {
+                if (args.size() < 5)
+                    throw std::runtime_error("Mandatory argument(s) missing!");
+
+                QString url = args[2];
+                QString cat = args[3];
+                QString dir = args[4];
+                commandImpl = new ReceiveFileDirect(url, cat, dir, this);
             }
             else
             {
@@ -177,6 +200,11 @@ USAGE: %1 send        <server-url> <message>   -- Send messages.\n\
        %1 receive_log_direct <server-url> <comma separated list of categories>\n\
                                                -- Subscribe to chosen categories.\n\
 \n\
+       %1 emit_file_direct    <server-url> <comma separated list of categories> <from directory> <file filters>\n\
+                                               -- Publish files under a directory by category.\n\
+       %1 receive_file_direct <server-url> <comma separated list of categories> <to directory>\n\
+                                               -- Subscribe to chosen category.\n\
+\n\
 Simple \"Hello World!\":\n\
 * Producer: %1 send    amqp://guest:guest@127.0.0.1:5672/ \"Hello World\"\n\
 * Consumer: %1 receive amqp://guest:guest@127.0.0.1:5672/\n\
@@ -192,6 +220,11 @@ Publish/Subscribe:\n\
 Routing:\n\
 * Producer: %1 emit_log_direct    amqp://guest:guest@127.0.0.1:5672/ red,blue,green\n\
 * Consumer: %1 receive_log_direct amqp://guest:guest@127.0.0.1:5672/ blue,yellow\n\
+\n\
+\n\
+Routing Files in a directory:\n\
+* Producer: %1 emit_file_direct    amqp://guest:guest@127.0.0.1:5672/ high,med,low  from_dir *.txt,*.log\n\
+* Consumer: %1 receive_file_direct amqp://guest:guest@127.0.0.1:5672/ high,verylow  to_dir\n\
 \n").arg(executable);
     }
 };

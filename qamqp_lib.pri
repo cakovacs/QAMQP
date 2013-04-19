@@ -34,3 +34,5 @@ HEADERS += src/workqueues/NewTask.h
 HEADERS += src/workqueues/Worker.h
 HEADERS += src/sendreceive/Send.h
 HEADERS += src/sendreceive/Receive.h
+HEADERS += src/routing/ReceiveFileDirect.h
+HEADERS += src/routing/EmitFileDirect.h
