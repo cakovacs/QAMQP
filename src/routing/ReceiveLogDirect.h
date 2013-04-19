@@ -38,7 +38,7 @@ public:
         queue_->declare("", Queue::Exclusive);
 
         connect(queue_, SIGNAL(declared()), this, SLOT(declared()));
-        connect(queue_, SIGNAL(messageReceived()), this, SLOT(newMessage()));
+        connect(queue_, SIGNAL(messageReceived(QAMQP::Queue*)), this, SLOT(newMessage(QAMQP::Queue*)));
     }
 
     void run()
@@ -57,11 +57,14 @@ protected slots:
         queue_->consume(QAMQP::Queue::coNoAck);
     }
 
-    void newMessage()
+    void newMessage(QAMQP::Queue* queue)
     {
+	if (queue != queue_) {
+	    qDebug() << "ReceiveLogDirect::newMessage() " << "Ignoring message received from a different queue";
+	}
         // Retrieve message
         QAMQP::MessagePtr message = queue_->getMessage();
-        qDebug() << "ReceiveLogDirect::newMessage " << message->payload;
+        qDebug() << "ReceiveLogDirect::newMessage() " << message->payload;
     }
 
 private:
