@@ -7,3 +7,6 @@ Makefile_lib: qamqp_lib.pro
 
 Makefile_app: qamqp_app.pro
 	qmake -o $@ $<
+
+clean:
+	rm -rf install .obj Makefile_app Makefile_lib Makefile
