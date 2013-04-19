@@ -16,3 +16,6 @@ LIBS += -lQAMQP
 SOURCES += src/main.cpp
 
 HEADERS += src/QamqpApp.h
+
+CONFIG += debug
+CONFIG -= release

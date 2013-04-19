@@ -1,6 +1,6 @@
 all: Makefile_lib Makefile_app
-	$(MAKE) -f Makefile_lib install
-	$(MAKE) -f Makefile_app
+	$(MAKE) -f Makefile_lib install 
+	$(MAKE) -f Makefile_app 
 
 Makefile_lib: qamqp_lib.pro
 	qmake -o $@ $<
