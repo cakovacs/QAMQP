@@ -9,6 +9,6 @@ Makefile_app: qamqp_app.pro
 	qmake -o $@ $<
 
 clean:
-	rm -rf install .obj Makefile_app Makefile_lib Makefile
+	rm -rf install .obj Makefile_app Makefile_lib 
 
 .PHONY: Makefile_lib Makefile_app
