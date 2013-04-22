@@ -42,6 +42,8 @@ public:
 	// set list of files in the directory using file filters, if any
 	files_ = dir_.entryList(filters_);
 	qDebug() << "Number of files found: " << files_.size();
+	for (int i=0; i<files_.size(); i++)
+	    qDebug() << "      File[" << i << "]=" << files_[i];
     }
 
     void run()
@@ -83,17 +85,36 @@ protected slots:
 	    return;
 	}
         data = fd.readAll();
-        qDebug() << "EmitFileDirect::EmitFileMessage() size() without file data=" << message.length();
-	//message.append(data);
+#if 1
+	QAMQP::Exchange::MessageProperties m_prop;
+	QString mime_type("geopro/octet-stream");
+        QByteArray ba_message;
+        ba_message.append(message);
+	ba_message.append(data);
+        exchange_->publish(ba_message, key, mime_type, m_prop);
+        qDebug() << "EmitFileDirect::EmitFileMessage() data.size()=" << data.size();
+        qDebug() << "EmitFileDirect::EmitFileMessage() ba_message.size() with file data=" << ba_message.size();
+#endif
+#if 0
+	message.append(data);
+#endif
+#if 0
+        qDebug() << "EmitFileDirect::EmitFileMessage() message.size() without file data=" << message.length();
 	char* bytes = data.data();
-	for (int i=0; i<data.size(); i++) 
-	    message += bytes[i];
-        qDebug() << "EmitFileDirect::EmitFileMessage() size() with file data=" << message.length();
         qDebug() << "EmitFileDirect::EmitFileMessage() data.size() =" << data.size();
-	fd.close();
+	for (int i=0; i<data.size(); i++) 
+	{
+	    message += bytes[i];
+//	    if (i % 1000 == 0) 
+//		qDebug() << "i=" << i << " message.size()=" << message.length();
+	}
+        qDebug() << "EmitFileDirect::EmitFileMessage() data.size()=" << data.size();
+        qDebug() << "EmitFileDirect::EmitFileMessage() size() with file data=" << message.length();
 
         // Publish
         exchange_->publish(message, key);
+#endif
+	fd.close();
     }
 
 private:
