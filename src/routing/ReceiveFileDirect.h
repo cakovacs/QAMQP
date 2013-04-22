@@ -61,33 +61,30 @@ protected slots:
 
     void newMessage(QAMQP::Queue* queue)
     {
+	// file contents starts immediately after the data_tag
 	const QString data_tag("data=");
 	if (queue != queue_) {
 	    qDebug() << "ReceiveFileDirect::newMessage() " << "Ignoring message received from a different queue";
 	}
+
         // Retrieve message
         QAMQP::MessagePtr message = queue_->getMessage();
-        int length = message->payload.length();
-	int file_start=message->payload.indexOf("[");
-	int file_end  =message->payload.indexOf("]");
+        int msg_length    = message->payload.length();
+	int file_start    = message->payload.indexOf("[");
+	int file_end      = message->payload.indexOf("]");
 	QString file_name = message->payload.mid(file_start+1, file_end-file_start-1);
-        qDebug() << "ReceiveFileDirect::newMessage() " << message->payload;
-        qDebug() << "ReceiveFileDirect::newMessage() message.size()=" << length;
-	qDebug() << "file_start=" << file_start;
-	qDebug() << "file_end  =" << file_end;
-	qDebug() << "file_name =" << file_name;
-	int data_index = message->payload.indexOf(data_tag);
+	int data_index    = message->payload.indexOf(data_tag);
 
-	qDebug() << "data size=" << length-(data_index+data_tag.size());
-	QByteArray data = message->payload.right(length-(data_index+data_tag.size()));
+	QByteArray data = message->payload.right(msg_length-(data_index+data_tag.size()));
 
 	QFile fd(dir_.filePath(file_name));
 	if (! fd.open(QIODevice::WriteOnly)) {
-	    qDebug() << "EmitFileDirect::ReceiverFileMessage() Error, could not open file: " << dir_.absolutePath() << "/" << file_name;
+	    qDebug() << "ReceiveFileDirect::newMessage() Error, could not open file: " << dir_.absolutePath() << "/" << file_name;
 	    return;
 	}
         fd.write(data);
 	fd.close();
+	qDebug() << "ReceiveFileDirect::newMessage() Received file: " << file_name;
     }
 
 private:

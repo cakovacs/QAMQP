@@ -66,55 +66,37 @@ protected slots:
             qDebug() << "EmitFileDirect::EmitFileMessage() -- end-of-files in directory ";
 	    return;
 	}
+
+	// get a file from the top of the stack
 	QString file=files_[0];
 	files_.pop_front();
 
-        // Create Message
-        QString message(QString("%1: [%2] %3 data=")
-          .arg(++counter)
-          .arg(file)
-          .arg(key)
-          );
-        qDebug() << "EmitFileDirect::EmitFileMessage() " << message;
-	
-	QByteArray data;
 
+	// get the contents of the file
 	QFile fd(dir_.filePath(file));
 	if (! fd.open(QIODevice::ReadOnly)) {
 	    qDebug() << "EmitFileDirect::EmitFileMessage() Error, could not open file: " << dir_.absolutePath() << "/" << file;
 	    return;
 	}
-        data = fd.readAll();
-#if 1
-	QAMQP::Exchange::MessageProperties m_prop;
-	QString mime_type("geopro/octet-stream");
-        QByteArray ba_message;
-        ba_message.append(message);
-	ba_message.append(data);
-        exchange_->publish(ba_message, key, mime_type, m_prop);
-        qDebug() << "EmitFileDirect::EmitFileMessage() data.size()=" << data.size();
-        qDebug() << "EmitFileDirect::EmitFileMessage() ba_message.size() with file data=" << ba_message.size();
-#endif
-#if 0
-	message.append(data);
-#endif
-#if 0
-        qDebug() << "EmitFileDirect::EmitFileMessage() message.size() without file data=" << message.length();
-	char* bytes = data.data();
-        qDebug() << "EmitFileDirect::EmitFileMessage() data.size() =" << data.size();
-	for (int i=0; i<data.size(); i++) 
-	{
-	    message += bytes[i];
-//	    if (i % 1000 == 0) 
-//		qDebug() << "i=" << i << " message.size()=" << message.length();
-	}
-        qDebug() << "EmitFileDirect::EmitFileMessage() data.size()=" << data.size();
-        qDebug() << "EmitFileDirect::EmitFileMessage() size() with file data=" << message.length();
-
-        // Publish
-        exchange_->publish(message, key);
-#endif
+	QByteArray data = fd.readAll();
 	fd.close();
+
+        // Create Message
+	QAMQP::Exchange::MessageProperties m_prop;  // use default message properties
+	QString mime_type("geopro/octet-stream");   // assume all data files are binary
+        QByteArray ba_message;                      // build the message byte array
+
+        QString message_header(QString("%1: [%2] %3 data=")
+          .arg(++counter)
+          .arg(file)
+          .arg(key)
+          );
+	
+        ba_message.append(message_header);
+	ba_message.append(data);
+
+	qDebug() << "EmitFileDirect::EmitFileMessage() Sending file: " << file;
+        exchange_->publish(ba_message, key, mime_type, m_prop);
     }
 
 private:
