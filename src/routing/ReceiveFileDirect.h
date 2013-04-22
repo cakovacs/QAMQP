@@ -75,7 +75,35 @@ protected slots:
 	QString file_name = message->payload.mid(file_start+1, file_end-file_start-1);
 	int data_index    = message->payload.indexOf(data_tag);
 
-	QByteArray data = message->payload.right(msg_length-(data_index+data_tag.size()));
+	QByteArray data  = message->payload.right(msg_length-(data_index+data_tag.size()));
+
+	// FIXME -- trying to get the filename in the header.
+	// FIXME -- sender looks correct
+	// FIXME -- receiver get keys but no values for the keys
+#if 0
+	//QAMQP::Frame::TableField &headers = message->headers;
+	QHash<QAMQP::Message::MessageProperty, QVariant> &property = message->property;
+	
+	QHashIterator<QAMQP::Message::MessageProperty, QVariant> i(property);
+	while (i.hasNext()) {
+	    i.next();
+	    qDebug() << i.key() << ": " << i.value();
+	}
+	QVariant tt = message->property[QAMQP::Content::cpHeaders];
+	qDebug() << "tt=" << tt;
+	qDebug() << "message->property=" << message->property;
+
+	QHash<QString, QVariant> hash = tt.toHash ();
+
+	qDebug() << "hash[fname]=" << hash["fname"].toString();
+
+	QHashIterator<QString, QVariant> it(hash);
+	while (it.hasNext()) {
+	    it.next();
+	    qDebug() << it.key() << ": " << it.value();
+	}
+
+#endif
 
 	QFile fd(dir_.filePath(file_name));
 	if (! fd.open(QIODevice::WriteOnly)) {
