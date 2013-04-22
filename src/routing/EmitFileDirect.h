@@ -70,7 +70,7 @@ protected slots:
 	files_.pop_front();
 
         // Create Message
-        QString message(QString("[%1: %2] %3 bytearray=")
+        QString message(QString("%1: [%2] %3 data=")
           .arg(++counter)
           .arg(file)
           .arg(key)
