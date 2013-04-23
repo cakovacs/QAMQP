@@ -80,7 +80,7 @@ protected slots:
 	// FIXME -- trying to get the filename in the header.
 	// FIXME -- sender looks correct
 	// FIXME -- receiver get keys but no values for the keys
-#if 0
+#if 1
 	//QAMQP::Frame::TableField &headers = message->headers;
 	QHash<QAMQP::Message::MessageProperty, QVariant> &property = message->property;
 	
@@ -89,11 +89,12 @@ protected slots:
 	    i.next();
 	    qDebug() << i.key() << ": " << i.value();
 	}
-	QVariant tt = message->property[QAMQP::Content::cpHeaders];
-	qDebug() << "tt=" << tt;
-	qDebug() << "message->property=" << message->property;
+	QVariant headers = message->property[QAMQP::Content::cpHeaders];
 
-	QHash<QString, QVariant> hash = tt.toHash ();
+	qDebug() << "ReceiverFileDirect::newMessage() headers=" << headers;
+	qDebug() << "ReceiverFileDirect::newMessage() message->property=" << message->property;
+
+	QHash<QString, QVariant> hash = headers.toHash ();
 
 	qDebug() << "hash[fname]=" << hash["fname"].toString();
 

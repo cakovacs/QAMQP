@@ -96,25 +96,24 @@ protected slots:
 	ba_message.append(data);
 
 	qDebug() << "EmitFileDirect::EmitFileMessage() Sending file: " << file;
-	// FIXME -- trying to get the filename in the header.
-	// FIXME -- sender looks correct
-	// FIXME -- receiver get keys but no values for the keys
-	QVariantHash headers;
-#if 0
         //exchange_->publish(ba_message, key, mime_type, m_prop);
+	QVariantHash headers;
 	headers["fname"] = file;
 	headers["A"] = "AAAAAAAAAAA";
 	headers["B"] = "BBBBB";
 	headers["C"] = "CCCCCCCCCCCCCCCCC";
 
-	m_prop["ddddddddddddd"] = "ddddddddddd";
+
+	//m_prop["ddddddddddddd"] = "ddddddddddd";
+
+	qDebug() << "EmitFileDirect::EmitFileMessage() headers=" << headers;
+	//qDebug() << "EmitFileDirect::EmitFileMessage() property=" << m_prop;
 
 	QHashIterator<QString, QVariant> i(headers);
 	while (i.hasNext()) {
 	    i.next();
 	    qDebug() << i.key() << ": " << i.value();
 	}
-#endif
 
         exchange_->publish(ba_message, key, headers, mime_type, m_prop);
     }
