@@ -64,6 +64,7 @@ protected slots:
 
 	if (files_.isEmpty()) {
             qDebug() << "EmitFileDirect::EmitFileMessage() -- end-of-files in directory ";
+	    files_ = dir_.entryList(filters_);
 	    return;
 	}
 
@@ -71,6 +72,8 @@ protected slots:
 	QString file=files_[0];
 	files_.pop_front();
 
+	if (file == "." ) return;
+	if (file == "..") return;
 
 	// get the contents of the file
 	QFile fd(dir_.filePath(file));
@@ -83,7 +86,7 @@ protected slots:
 
         // Create Message
 	QAMQP::Exchange::MessageProperties m_prop;  // use default message properties
-	QString mime_type("geopro/octet-stream");   // assume all data files are binary
+	QString mime_type("image/jpeg");   // assume all data files are binary
         QByteArray ba_message;                      // build the message byte array
 
         QString message_header(QString("%1: [%2] %3 data=")
@@ -96,24 +99,25 @@ protected slots:
 	ba_message.append(data);
 
 	qDebug() << "EmitFileDirect::EmitFileMessage() Sending file: " << file;
-        //exchange_->publish(ba_message, key, mime_type, m_prop);
+	// FIXME -- trying to get the filename in the header.
+	// FIXME -- sender looks correct
+	// FIXME -- receiver get keys but no values for the keys
 	QVariantHash headers;
+#if 0
+        //exchange_->publish(ba_message, key, mime_type, m_prop);
 	headers["fname"] = file;
 	headers["A"] = "AAAAAAAAAAA";
 	headers["B"] = "BBBBB";
 	headers["C"] = "CCCCCCCCCCCCCCCCC";
 
-
-	//m_prop["ddddddddddddd"] = "ddddddddddd";
-
-	qDebug() << "EmitFileDirect::EmitFileMessage() headers=" << headers;
-	//qDebug() << "EmitFileDirect::EmitFileMessage() property=" << m_prop;
+	m_prop["ddddddddddddd"] = "ddddddddddd";
 
 	QHashIterator<QString, QVariant> i(headers);
 	while (i.hasNext()) {
 	    i.next();
 	    qDebug() << i.key() << ": " << i.value();
 	}
+#endif
 
         exchange_->publish(ba_message, key, headers, mime_type, m_prop);
     }
