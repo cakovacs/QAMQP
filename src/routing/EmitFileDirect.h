@@ -103,14 +103,12 @@ protected slots:
 	// FIXME -- sender looks correct
 	// FIXME -- receiver get keys but no values for the keys
 	QVariantHash headers;
-#if 0
+#if 1
         //exchange_->publish(ba_message, key, mime_type, m_prop);
 	headers["fname"] = file;
 	headers["A"] = "AAAAAAAAAAA";
 	headers["B"] = "BBBBB";
 	headers["C"] = "CCCCCCCCCCCCCCCCC";
-
-	m_prop["ddddddddddddd"] = "ddddddddddd";
 
 	QHashIterator<QString, QVariant> i(headers);
 	while (i.hasNext()) {
