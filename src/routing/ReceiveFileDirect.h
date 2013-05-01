@@ -35,9 +35,15 @@ public:
         QAMQP::Client* client = new QAMQP::Client(this);
         client->open(QUrl(address));
 
+#if 1
         // Create an exclusive queue
         queue_ = client->createQueue();
         queue_->declare("", Queue::Exclusive);
+#else
+        // Create an exclusive queue
+        queue_ = client->createQueue("files");
+        queue_->declare("", Queue::Exclusive);
+#endif
 
         connect(queue_, SIGNAL(declared()), this, SLOT(declared()));
         connect(queue_, SIGNAL(messageReceived(QAMQP::Queue*)), this, SLOT(newMessage(QAMQP::Queue*)));
@@ -53,7 +59,10 @@ protected slots:
         // Loop on the list to bind with the keys
         QStringList split(list_.split(',', QString::SkipEmptyParts));
         for(int i = 0; i < split.size(); ++i)
+	{
+	    qDebug() << "Binding exchange " << "direct_files" << " to key " << split.at(i);
             queue_->bind("direct_files", split.at(i));
+	}
 
         // Start consuming
         queue_->consume(QAMQP::Queue::coNoAck);
@@ -69,18 +78,20 @@ protected slots:
 
         // Retrieve message
         QAMQP::MessagePtr message = queue_->getMessage();
+#if 0
         int msg_length    = message->payload.length();
 	int file_start    = message->payload.indexOf("[");
 	int file_end      = message->payload.indexOf("]");
 	QString file_name = message->payload.mid(file_start+1, file_end-file_start-1);
 	int data_index    = message->payload.indexOf(data_tag);
-
 	QByteArray data  = message->payload.right(msg_length-(data_index+data_tag.size()));
+#else
+	QByteArray &data  = message->payload;
+#endif
 
-	// FIXME -- trying to get the filename in the header.
-	// FIXME -- sender looks correct
-	// FIXME -- receiver get keys but no values for the keys
+
 #if 1
+#if 0
 	//QAMQP::Frame::TableField &headers = message->headers;
 	QHash<QAMQP::Message::MessageProperty, QVariant> &property = message->property;
 	
@@ -89,14 +100,17 @@ protected slots:
 	    i.next();
 	    qDebug() << i.key() << ": " << i.value();
 	}
+#endif
+
 	QVariant headers = message->property[QAMQP::Content::cpHeaders];
 
-	qDebug() << "ReceiverFileDirect::newMessage() headers=" << headers;
-	qDebug() << "ReceiverFileDirect::newMessage() message->property=" << message->property;
+//	qDebug() << "ReceiverFileDirect::newMessage() headers=" << headers;
+//	qDebug() << "ReceiverFileDirect::newMessage() message->property=" << message->property;
 
 	QHash<QString, QVariant> hash = headers.toHash ();
 
-	qDebug() << "hash[fname]=" << hash["fname"].toString();
+//	qDebug() << "hash[fname]=" << hash["fname"].toString();
+	QString file_name = hash["fname"].toString();
 
 	QHashIterator<QString, QVariant> it(hash);
 	while (it.hasNext()) {
@@ -114,6 +128,11 @@ protected slots:
         fd.write(data);
 	fd.close();
 	qDebug() << "ReceiveFileDirect::newMessage() Received file: " << file_name;
+#if 0
+	qDebug() << "sleeping................";
+	sleep(5);
+	qDebug() << "woke up ................";
+#endif
     }
 
 private:
