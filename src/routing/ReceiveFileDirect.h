@@ -35,15 +35,9 @@ public:
         QAMQP::Client* client = new QAMQP::Client(this);
         client->open(QUrl(address));
 
-#if 1
         // Create an exclusive queue
         queue_ = client->createQueue();
         queue_->declare("", Queue::Exclusive);
-#else
-        // Create an exclusive queue
-        queue_ = client->createQueue("files");
-        queue_->declare("", Queue::Exclusive);
-#endif
 
         connect(queue_, SIGNAL(declared()), this, SLOT(declared()));
         connect(queue_, SIGNAL(messageReceived(QAMQP::Queue*)), this, SLOT(newMessage(QAMQP::Queue*)));
@@ -78,67 +72,38 @@ protected slots:
 
         // Retrieve message
         QAMQP::MessagePtr message = queue_->getMessage();
-#if 0
-        int msg_length    = message->payload.length();
-	int file_start    = message->payload.indexOf("[");
-	int file_end      = message->payload.indexOf("]");
-	QString file_name = message->payload.mid(file_start+1, file_end-file_start-1);
-	int data_index    = message->payload.indexOf(data_tag);
-	QByteArray data  = message->payload.right(msg_length-(data_index+data_tag.size()));
-#else
 	QByteArray &data  = message->payload;
-#endif
 
+	QVariant                 headers = message->property[QAMQP::Content::cpHeaders];
+	QHash<QString, QVariant> hash    = headers.toHash ();
 
-#if 1
-#if 0
-	//QAMQP::Frame::TableField &headers = message->headers;
-	QHash<QAMQP::Message::MessageProperty, QVariant> &property = message->property;
-	
-	QHashIterator<QAMQP::Message::MessageProperty, QVariant> i(property);
-	while (i.hasNext()) {
-	    i.next();
-	    qDebug() << i.key() << ": " << i.value();
-	}
-#endif
-
-	QVariant headers = message->property[QAMQP::Content::cpHeaders];
-
-//	qDebug() << "ReceiverFileDirect::newMessage() headers=" << headers;
-//	qDebug() << "ReceiverFileDirect::newMessage() message->property=" << message->property;
-
-	QHash<QString, QVariant> hash = headers.toHash ();
-
-//	qDebug() << "hash[fname]=" << hash["fname"].toString();
 	QString file_name = hash["fname"].toString();
 
+#if 0
+	// debugging headers.........
 	QHashIterator<QString, QVariant> it(hash);
-	while (it.hasNext()) {
+	while (it.hasNext()) 
+	{
 	    it.next();
 	    qDebug() << it.key() << ": " << it.value();
 	}
-
 #endif
 
 	QFile fd(dir_.filePath(file_name));
-	if (! fd.open(QIODevice::WriteOnly)) {
+	if (! fd.open(QIODevice::WriteOnly)) 
+	{
 	    qDebug() << "ReceiveFileDirect::newMessage() Error, could not open file: " << dir_.absolutePath() << "/" << file_name;
 	    return;
 	}
         fd.write(data);
 	fd.close();
 	qDebug() << "ReceiveFileDirect::newMessage() Received file: " << file_name;
-#if 0
-	qDebug() << "sleeping................";
-	sleep(5);
-	qDebug() << "woke up ................";
-#endif
     }
 
 private:
-    QString list_;
+    QString       list_;
     QAMQP::Queue* queue_;
-    QDir    dir_;
+    QDir          dir_;
 };
 
 }
